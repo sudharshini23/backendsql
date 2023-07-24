@@ -15,24 +15,36 @@ exports.postAddProduct = (req, res, next) => {
   const imageUrl = req.body.imageUrl;
   const price = req.body.price;
   const description = req.body.description;
+  req.user
+  .createProduct({
+    title: title,
+    price: price,
+    imageUrl: imageUrl,
+    description: description
+  })
+  .then(result => {
+    console.log('Created new product');
+    res.redirect('/admin/products');
+  })
+  .catch(err => {
+    console.log(err);
+  })
   // const product = new Product(null, title, imageUrl, description, price);
   // product
   // .save()
   // .then(res.redirect('/'))
   // .catch(err => console.log(err));
   // // res.redirect('/');
-  Product.create({
-    title: title,
-    price: price,
-    imageUrl: imageUrl,
-    description: description
-  }).then(result => {
-    res.redirect('/');
-    console.log(result);
-  })
-  .catch(err => {
-    console.log(err);
-  })
+
+  // Product.create({
+  //   title: title,
+  //   price: price,
+  //   imageUrl: imageUrl,
+  //   description: description,
+  //   userId: req.user.id
+  // })
+
+  
 };
 
 // TO EDIT PRODUCTS THAT ARE DISPLAYED ON ADMIN PRODUCTS PAGE
@@ -80,7 +92,17 @@ exports.postEditProduct = (req, res, next) => {
   const updatedImageUrl = req.body.imageUrl;
   const updatedDesc = req.body.description;
   Product.findByPk(prodId)
-  .then(product )
+  .then(product => {
+    product.title = updatedTitle;
+    product.price = updatedPrice;
+    product.imageUrl = updatedImageUrl;
+    product.description = updatedDesc;
+    return product.save();
+  })
+  .then(result => {
+    console.log('UPDATED PRODUCT');
+    res.redirect('/admin/products');
+  })
   .catch(err => {
     console.log(err)
   })
@@ -92,7 +114,7 @@ exports.postEditProduct = (req, res, next) => {
   //   updatedPrice
   // );
   // updatedProduct.save();
-  res.redirect('/admin/products');
+  // res.redirect('/admin/products');
 };
 
 
@@ -118,8 +140,18 @@ exports.getProducts = (req, res, next) => {
   // });
 };
 
+// DELETE BUTTON
 exports.postDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
-  Product.deleteById(prodId);
-  res.redirect('/admin/products');
+  Product.findByPk(prodId)
+  .then(product => {
+    return product.destroy();
+  })
+  .then(result => {
+    console.log('DESTROYED PRODUCT');
+    res.redirect('/admin/products');
+  })
+  .catch(err => {
+    console.log(err);
+  })
 };
