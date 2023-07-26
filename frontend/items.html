@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>General Store Items</title>
+</head>
+<body>
+    <form id="sellerform" action="#" onsubmit="getValues(event)" method="POST">
+        <h1> General Store Items </h1>
+        <label for="itemname" class="form-label"> Item Name: </label>
+        <input type="text" id="itemname" name="name" class="form-control" />
+        <label for="description" class="form-label"> Description: </label>
+        <input type="text" id="description" name="desc" class="form-control" />
+        <label for="price" class="form-label"> Price: </label>
+        <input type="number" id="price" name="price" class="form-control" />
+        <label for="quantity" class="form-label"> Quantity: </label>
+        <input type="number" id="quantity" name="qty" class="form-control" />
+        <button>Add Item</button>
+    </form>
+
+    <ul id='listOfItems'></ul>
+    <p id='list'></p>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
+
+    <script>
+        function getValues(event) {
+            event.preventDefault();
+            const itemname = event.target.name.value;
+            const description = event.target.desc.value;
+            const price = event.target.price.value;
+            const quantity = event.target.qty.value;
+            const obj1 = {
+                itemname,
+                description,
+                price,
+                quantity
+            }
+
+            axios.post("http://localhost:3000/items/add-item", obj1)
+            .then((response) => {
+                displayDetails(response.data.newItemDetail)
+            })
+            .catch((error) => {
+                document.body.innerHTML = document.body.innerHTML + "<h4> Something went wrong </h4>"
+                console.log(err)
+            })
+        }
+
+        window.addEventListener("DOMContentLoaded", () => {
+            axios.get("http://localhost:3000/items/get-items")
+                .then((response) => {
+                    for(let i = 0; i < response.data.items.length; i++) {
+                        displayDetails(response.data.items[i]);
+                    }
+                })
+                .catch((error) => {
+                    console.log(error)
+                })
+        })
+
+        function displayDetails(obj1) {
+            const parentItems = document.getElementById('listOfItems');
+            const childNode = `<li id=${obj1.id}> ${obj1.itemName} - ${obj1.description} - ${obj1.price} - ${obj1.quantity}
+                                    <button onclick=addOne('${obj1.id}', '${obj1.itemName}','${obj1.description}','${obj1.price}','${obj1.quantity}')> Buy One </button>
+                                    <button onclick=addTwo('${obj1.id}', '${obj1.itemName}','${obj1.description}','${obj1.price}','${obj1.quantity}')> Buy Two </button>
+                                    <button onclick=addThree('${obj1.id}',' ${obj1.itemName}','${obj1.description}','${obj1.price}','${obj1.quantity}')> Buy Three </button>
+                                </li>`
+            parentItems.innerHTML = parentItems.innerHTML+ childNode
+            // parentItems.appendChild(childNode);
+        }
+
+        function addOne(itemId, itemname, desc, price, qty) {
+            axios.put(`http://localhost:3000/items/buy-item/${itemId}`,{ 
+                itemName: itemname,
+                description: desc,
+                price: price,
+                quantity: qty - 1,
+            })
+            .then((response) => {
+                // let obj1 = {
+                //     candyname: candyname,
+                //     description: desc,
+                //     _id: prodId,
+                //     price: price,
+                //     quantity: qty - Number(1)
+                // }
+                console.log("Bought 1", response);
+                document.getElementById('listOfItems').removeChild(document.getElementById(itemId))
+                displayDetails(response.data.items)
+                // console.log(response)
+                // console.log(response.data)
+            })
+            .catch((error) => {
+                console.log(error)
+            })
+        }
+
+        function addTwo(itemId, itemname, desc, price, qty) {
+            axios.put(`http://localhost:3000/items/buy-item/${itemId}`,{
+                itemName: itemname,
+                description: desc,
+                price: price,
+                quantity: qty - 2,
+            })
+            .then((response) => {
+                // let obj2 = {
+                //     candyname: candyname,
+                //     description: desc,
+                //     _id: prodId,
+                //     price: price,
+                //     quantity: qty - Number(2)
+                // }
+                console.log("Bought 2", response);
+                document.getElementById('listOfItems').removeChild(document.getElementById(itemId))
+                displayDetails(response.data.items)
+            })
+            .catch((error) => {
+                console.log(error)
+            })
+        }
+
+        function addThree(itemId, itemname, desc, price, qty) {
+            axios.put(`http://localhost:3000/items/buy-item/${itemId}`,{
+                itemName: itemname,
+                description: desc,
+                price: price,
+                quantity: qty - 3,
+            })
+            .then((response) => {
+                // let obj3 = {
+                //     candyname: candyname,
+                //     description: desc,
+                //     _id: prodId,
+                //     price: price,
+                //     quantity: qty - Number(3)
+                // }
+                console.log("Bought 3", response);
+                document.getElementById('listOfItems').removeChild(document.getElementById(itemId))
+                displayDetails(response.data.items)
+            })
+            .catch((error) => {
+                console.log(error)
+            })
+        }
+    </script>
+</body>
+</html>
